@@ -62,30 +62,30 @@ The `@DockerCompose` annotation can be used with regular `docker-compose.yml` fi
 Use the `shared` value of the annotation to define is the docker-compose environment should be shared between test runs. 
 
 ```groovy
- @DockerCompose(composeFile = "src/test/resources/docker-compose-uptime.yml", 
-                exposedServicePorts = [@Expose(service = "whoami", port = 80)], shared = true)
- @Stepwise
- class DockerComposeSpecSharedAnnotationIT extends Specification {
+@DockerCompose(composeFile = "src/test/resources/docker-compose-uptime.yml", 
+            exposedServicePorts = [@Expose(service = "whoami", port = 80)], shared = true)
+@Stepwise
+class DockerComposeSpecSharedAnnotationIT extends Specification {
 
- 
-     @Shared
-     DockerComposeFacade sharedDockerComposeFacade
- 
-     DockerComposeFacade instanceDockerComposeFacade
- 
-     @Shared
-     String lastHost
- 
-     def "running compose defined container is accessible on configured port"() {
-         given: "a http client"
-         def client = HttpClientBuilder.create().build()
- 
-         when: "accessing web server"
-         def response = client.execute(new HttpGet("http://localhost:8080"))
- 
-         then: "docker container is running and returns http status code 200"
-         response.statusLine.statusCode == 200
-     }
+
+    @Shared
+    DockerComposeFacade sharedDockerComposeFacade
+    
+    DockerComposeFacade instanceDockerComposeFacade
+    
+    @Shared
+    String lastHost
+    
+    def "running compose defined container is accessible on configured port"() {
+        given: "a http client"
+        def client = HttpClientBuilder.create().build()
+        
+        when: "accessing web server"
+        def response = client.execute(new HttpGet("http://localhost:8080"))
+        
+        then: "docker container is running and returns http status code 200"
+        response.statusLine.statusCode == 200
+    }
 }
 ```
 
