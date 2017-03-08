@@ -5,6 +5,7 @@ import org.spockframework.runtime.extension.AbstractMethodInterceptor
 import org.spockframework.runtime.extension.IMethodInvocation
 import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.FieldInfo
+import org.spockframework.runtime.model.SpecInfo
 
 class DockerComposeMethodInterceptor extends AbstractMethodInterceptor {
 
@@ -12,19 +13,23 @@ class DockerComposeMethodInterceptor extends AbstractMethodInterceptor {
     private final boolean isShared
     private final FeatureInfo feature
 
-    DockerComposeMethodInterceptor(DockerCompose dockerCompose, FeatureInfo feature) {
+    private DockerComposeMethodInterceptor(DockerCompose dockerCompose, Class<?> specClass) {
         def composeFile = dockerCompose.composeFile()
         def servicePorts = dockerCompose.exposedServicePorts()
         this.isShared = dockerCompose.shared()
         def exposedServiceInstances = servicePorts.collect({
             new ExposedServiceInstance(it.service(), it.port(), it.instance())
         })
-        this.dockerComposeClient = new DockerComposeFacade(composeFile, exposedServiceInstances)
-        this.feature = feature
+        this.dockerComposeClient = new DockerComposeFacade(composeFile, exposedServiceInstances, specClass)
     }
 
-    DockerComposeMethodInterceptor(DockerCompose dockerCompose) {
-        this(dockerCompose, null)
+    DockerComposeMethodInterceptor(DockerCompose dockerCompose, FeatureInfo featureInfo) {
+        this(dockerCompose, featureInfo.spec.reflection)
+        this.feature = featureInfo
+    }
+
+    DockerComposeMethodInterceptor(DockerCompose dockerCompose, SpecInfo specInfo) {
+        this(dockerCompose, specInfo.reflection)
     }
 
     @Override

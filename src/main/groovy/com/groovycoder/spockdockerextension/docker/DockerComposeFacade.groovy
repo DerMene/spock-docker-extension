@@ -8,18 +8,28 @@ class DockerComposeFacade {
     String composeFile
     DockerComposeContainer dockerComposeContainer
     Collection<ExposedServiceInstance> exposedServiceInstances
+    Class<?> specClass
 
     DockerComposeFacade(String composeFile) {
-        this(composeFile, Collections.emptyList())
+        this(composeFile, Collections.emptyList(), null)
     }
 
-    DockerComposeFacade(String composeFile, Collection<ExposedServiceInstance> exposedServiceInstances) {
+    DockerComposeFacade(String composeFile, Collection<ExposedServiceInstance> exposedServiceInstances, Class<?> specClass) {
         this.composeFile = composeFile
         this.exposedServiceInstances = exposedServiceInstances.asImmutable()
+        this.specClass = specClass
     }
 
     void up() {
-        dockerComposeContainer = new DockerComposeContainer(new File(composeFile))
+        def uri = new URI(composeFile)
+        File file
+        if (uri.scheme == null) {
+            file = new File(composeFile)
+        } else if (uri.scheme == "resource") {
+            def resourceUrl = specClass.getResource(uri.schemeSpecificPart)
+            file = new File(resourceUrl.toURI())
+        }
+        dockerComposeContainer = new DockerComposeContainer(file)
                 .withLocalCompose(true)
         exposedServiceInstances.each {
             dockerComposeContainer.withExposedService(it.service, it.instance, it.port)

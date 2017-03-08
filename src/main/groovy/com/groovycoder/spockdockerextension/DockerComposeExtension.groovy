@@ -22,7 +22,7 @@ class DockerComposeExtension extends AbstractAnnotationDrivenExtension<DockerCom
 
     @Override
     void visitSpecAnnotation(DockerCompose annotation, SpecInfo spec) {
-        def interceptor = new DockerComposeMethodInterceptor(annotation)
+        def interceptor = new DockerComposeMethodInterceptor(annotation, spec)
         if (annotation.shared()) {
             spec.addSetupSpecInterceptor(interceptor)
             spec.addCleanupSpecInterceptor(interceptor)
